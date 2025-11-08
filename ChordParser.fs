@@ -8,30 +8,9 @@ module ChordParser.ChordParser
 //       - Tonality parsing could accidentally partially match ("m" before "min"). Order seems okay, but be careful.
 
 module Domain =
-    let rootNotes =
-        [ "A"
-          "A#"
-          "Bb"
-          "B"
-          "C"
-          "C#"
-          "Db"
-          "D"
-          "D#"
-          "Eb"
-          "E"
-          "F"
-          "F#"
-          "Gb"
-          "G"
-          "G#"
-          "Ab" ]
+    let rootNotes = [ "A"; "A#"; "Bb"; "B"; "C"; "C#"; "Db"; "D"; "D#"; "Eb"; "E"; "F"; "F#"; "Gb"; "G"; "G#"; "Ab" ]
 
-    type Chord =
-        { Root: string
-          Tonality: string option
-          Extension: string option
-          BassNote: string option }
+    type Chord = { Root: string; Tonality: string option; Extension: string option; BassNote: string option }
 
     let transpose semitones preferredAccidental chord =
         let sharps = rootNotes |> List.filter (fun n -> not (n.EndsWith "b"))
@@ -52,9 +31,7 @@ module Domain =
             |> Option.defaultWith (fun () -> failwith $"Invalid note: '{note}'")
             |> fun idx -> notes.[wrapAround (idx + semitones) 12]
 
-        { chord with
-            Root = chord.Root |> transposeNote
-            BassNote = chord.BassNote |> Option.map transposeNote }
+        { chord with Root = chord.Root |> transposeNote; BassNote = chord.BassNote |> Option.map transposeNote }
 
     // NOTE: Consider pattern matching for clarity.
     let chordToString chord =
@@ -77,10 +54,7 @@ module Parser =
     let ws = spaces
 
     let createChord (((root, tonality), ext), bassNote) =
-        { Root = root
-          Tonality = tonality
-          Extension = ext
-          BassNote = bassNote }
+        { Root = root; Tonality = tonality; Extension = ext; BassNote = bassNote }
         |> ChordChart.Chord
 
     let chord =
@@ -92,16 +66,18 @@ module Parser =
             |>> string
 
         let tonality =
-            [ strCI "maj"
-              str "M"
-              strCI "min"
-              str "m"
-              str "-"
-              strCI "dim"
-              str "o"
-              strCI "aug"
-              str "+"
-              str "+5" ] // order matters to avoid partial consumption bugs
+            [
+                strCI "maj"
+                str "M"
+                strCI "min"
+                str "m"
+                str "-"
+                strCI "dim"
+                str "o"
+                strCI "aug"
+                str "+"
+                str "+5"
+            ] // order matters to avoid partial consumption bugs
             |> choice
             |>> string // |> opt (skipChar ' ') // NOTE[TEMP]: optional space before tonality
 
@@ -130,8 +106,8 @@ module Parser =
 
     let parseChordChart text =
         match run chordChart text with
-        | Success(ast, _, _) -> ast
-        | Failure(_, error, _) -> failwith (error.ToString())
+        | Success (ast, _, _) -> ast
+        | Failure (_, error, _) -> failwith (error.ToString ())
 
 
 
@@ -143,9 +119,9 @@ open Domain
 let processText (semitones: int) (preferredAccidental: string) (IsUppercase: bool) (text: string) =
     Parser.parseChordChart text
     |> List.map (function
-        | Parser.Lyrics lyrics -> if IsUppercase then lyrics.ToUpper() else lyrics
+        | Parser.Lyrics lyrics -> if IsUppercase then lyrics.ToUpper () else lyrics
         | Parser.Chord chord -> chord |> transpose semitones preferredAccidental |> chordToString)
-    |> List.fold (fun (sb: StringBuilder) txt -> sb.Append txt) (StringBuilder())
+    |> List.fold (fun (sb: StringBuilder) txt -> sb.Append txt) (StringBuilder ())
     |> string
 
 let tryProcessText (semitones: int) (preferredAccidental: string) (isUpper: bool) (text: string) =
