@@ -12,6 +12,8 @@ module Domain =
 
     type Chord = { Root: string; Tonality: string option; Extension: string option; BassNote: string option }
 
+    let wrapAround n modulus = ((n % modulus) + modulus) % modulus // handles negative values correctly
+
     let transpose semitones preferredAccidental chord =
         let sharps = rootNotes |> List.filter (fun n -> not (n.EndsWith "b"))
         let flats = rootNotes |> List.filter (fun n -> not (n.EndsWith "#"))
@@ -22,7 +24,6 @@ module Domain =
             | "b" -> flats
             | _ -> failwith "Preferred Accidental must be either # or b."
 
-        let wrapAround n modulus = ((n % modulus) + modulus) % modulus // handles negative values correctly
 
         // NOTE: List.tryPick (List.tryFindIndex ...) |> Option.defaultWith failwith could be simplified.
         let transposeNote note =
