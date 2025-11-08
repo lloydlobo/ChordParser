@@ -47,8 +47,7 @@ let update msg model =
     | ParseChart ->
         {
             model with
-                OutputChordChart =
-                    ChordParser.tryProcessText model.Transpose model.Accidental model.IsUppercase model.InputChordChart
+                OutputChordChart = ChordParser.tryProcessText model.Transpose model.Accidental model.IsUppercase model.InputChordChart
         },
         Cmd.none
     | TransposeUp ->

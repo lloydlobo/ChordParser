@@ -24,9 +24,7 @@ module Domain =
             | "b" -> flats
             | _ -> failwith "Preferred Accidental must be either # or b."
 
-
-        // NOTE: List.tryPick (List.tryFindIndex ...) |> Option.defaultWith failwith could be simplified.
-        let transposeNote note =
+        let transposeNote note = // NOTE: List.tryPick (List.tryFindIndex ...) |> Option.defaultWith failwith could be simplified.
             [ sharps; flats ]
             |> List.tryPick (List.tryFindIndex ((=) note))
             |> Option.defaultWith (fun () -> failwith $"Invalid note: '{note}'")
@@ -34,12 +32,31 @@ module Domain =
 
         { chord with Root = chord.Root |> transposeNote; BassNote = chord.BassNote |> Option.map transposeNote }
 
-    // NOTE: Consider pattern matching for clarity.
-    let chordToString chord =
+    let chordToString chord = // NOTE: Consider pattern matching for clarity.
         let tonality = chord.Tonality |> Option.defaultValue ""
-        let extension = chord.Extension |> Option.defaultValue ""
+
+        let extension = // let extension = chord.Extension |> Option.defaultValue ""
+            match chord.Extension with
+            | Some ext when ext.Contains (" ") -> " " + ext
+            | Some ext -> ext
+            | None -> ""
+
         let bass = chord.BassNote |> Option.map (sprintf " /%s") |> Option.defaultValue ""
+
         $"({chord.Root}{tonality}{extension}{bass})"
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~
+// ^
+// |
+//  let chordToString chord =
+// |    match chord.Tonality, chord.Extension, chord.BassNote with
+// |    | Some t, Some e, Some b -> $"({chord.Root}{t}{e} /{b})"
+// |    | Some t, Some e, None -> $"({chord.Root}{t}{e})"
+// |    | Some t, None, Some b -> $"({chord.Root}{t} /{b})"
+// |    | None, Some e, Some b -> $"({chord.Root}{e} /{b})"
+// |    | Some t, None, None -> $"({chord.Root}{t})"
+// |    | None, Some e, None -> $"({chord.Root}{e})"
+// |    | None, None, Some b -> $"({chord.Root} /{b})"
+// |    | None, None, None -> $"({chord.Root})"
 
 
 module Parser =
@@ -67,18 +84,7 @@ module Parser =
             |>> string
 
         let tonality =
-            [
-                strCI "maj"
-                str "M"
-                strCI "min"
-                str "m"
-                str "-"
-                strCI "dim"
-                str "o"
-                strCI "aug"
-                str "+"
-                str "+5"
-            ] // order matters to avoid partial consumption bugs
+            [ strCI "maj"; str "M"; strCI "min"; str "m"; str "-"; strCI "dim"; str "o"; strCI "aug"; str "+"; str "+5" ] // order matters to avoid partial consumption bugs
             |> choice
             |>> string // |> opt (skipChar ' ') // NOTE[TEMP]: optional space before tonality
 
@@ -109,7 +115,6 @@ module Parser =
         match run chordChart text with
         | Success (ast, _, _) -> ast
         | Failure (_, error, _) -> failwith (error.ToString ())
-
 
 
 

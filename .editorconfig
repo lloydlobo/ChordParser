@@ -9,19 +9,28 @@ insert_final_newline = false
 
 # Source: https://stackoverflow.com/q/71356360
 [*.{fs,fsi,fsx}]
-fsharp_max_function_binding_width = 120
-#
-fsharp_max_array_or_list_width = 120
-fsharp_max_record_width = 120
-#
 end_of_line = lf
+indent_size = 4
+indent_style = space
+max_line_length = 160
+# Max widths
+fsharp_max_function_binding_width = 130
+fsharp_max_array_or_list_width = 130
+fsharp_max_record_width = 130
+fsharp_max_tuple_width = 130
+fsharp_max_discriminated_union_width = 130
+# Multiline formatting style
 fsharp_array_or_list_multiline_formatter = character_width
-fsharp_max_array_or_list_number_of_items = 1
 fsharp_record_multiline_formatter = character_width
-max_line_length = 120
-#
+fsharp_tuple_multiline_formatter = character_width
+fsharp_discriminated_union_multiline_formatter = character_width
+# Number of items per line when multiline
+fsharp_max_array_or_list_number_of_items = 1
+fsharp_max_record_number_of_fields = 1
+fsharp_max_tuple_number_of_items = 1
+fsharp_max_discriminated_union_number_of_cases = 1
+# Spaces and style
 fsharp_space_before_uppercase_invocation = true
 fsharp_space_around_delimiter = true
 fsharp_keep_if_then_in_same_line = true
-#
 fsharp_multiline_bracket_style = stroustrup
