@@ -13,20 +13,21 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     
-        <Compile Include="ChordParser.fs"/>
-        <Compile Include="SampleCharts.fs"/>
-        <Compile Include="ChordParserView.fs"/>
-        <Compile Include="Program.fs"/>
+        <Compile Include="ChordParser.fs" />
+        <Compile Include="SampleCharts.fs" />
+        <Compile Include="ChordParserView.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FParsec" Version="1.1.1"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.8"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.8"/>
+        <PackageReference Include="Expecto.FsCheck" Version="10.2.3" />
+        <PackageReference Include="FParsec" Version="1.1.1" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.8" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.8" />
 
-        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.8"/>
-        <PackageReference Include="Avalonia.FuncUI.Elmish" Version="1.5.1"/>
-        <PackageReference Include="Avalonia.FuncUI" Version="1.5.1"/>
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.8" />
+        <PackageReference Include="Avalonia.FuncUI.Elmish" Version="1.5.1" />
+        <PackageReference Include="Avalonia.FuncUI" Version="1.5.1" />
     </ItemGroup>
 
 </Project>
