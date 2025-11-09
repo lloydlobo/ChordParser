@@ -5,6 +5,7 @@ open Expecto
 open ChordParser.ChordParser
 
 
+
 [<Tests>]
 let warmupTests =
     testList "warmup" [
@@ -140,32 +141,16 @@ let domainChordTests =
 
         testCase "transpose with wraparound for sharps"
         <| fun _ ->
-            Tests.skiptest
-                """
-                [23:11:50 ERR] domain chord helpers.transpose with wraparound for sharps failed in 00:00:00.0450000.
-                Root transposed up 3 semitones. String does not match at position 0. Expected char: 'B', but got 'A'.
-                expected: B
-                  actual: A#
-                """
-
             let chord: Domain.Chord = { Root = "G"; Tonality = Some "maj"; Extension = Some "7"; BassNote = Some "F#" }
+            let actualChord = chord |> Domain.chordToString
+            let expectedChord = "(Gmaj7 /F#)"
+            Expect.equal actualChord expectedChord $"Expected {expectedChord} but got {actualChord}"
             let result = Domain.transpose 3 "#" chord
-            Expect.equal result.Root "B" "Root transposed up 3 semitones"
-            Expect.equal result.BassNote (Some "A#") "Bass note transposed up 3 semitones"
+            let expectedRoot = "A#"
+            let expectedBassNote = "A"
+            Expect.equal result.Root expectedRoot "Root transposed up 3 semitones"
+            Expect.equal result.BassNote (Some expectedBassNote) "Bass note transposed up 3 semitones"
 
-        // [23:08:02 ERR] domain chord helpers.transpose with wraparound for sharps failed in 00:00:00.0430000.
-        // Root transposed up 3 semitones. String does not match at position 0. Expected char: 'B', but got 'A'.
-        // expected: B
-        //   actual: A#
-        //    at HelperTests.domainChordTests@142-4.Invoke(Unit _arg4) in /home/user/Projects/ChordParser/ChordParser.Tests/Helper.fs:line 145
-        //    at Expecto.Impl.execTestAsync@578-1.Invoke(Unit unitVar)
-        //    at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2) in /__w/1/s/src/fsharp/src/FSharp.Core/async.fs:line 509
-        //    at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction) in /__w/1/s/src/fsharp/src/FSharp.Core/async.fs:line 112 <Expecto>
-        // [23:08:02 INF] EXPECTO! 18 tests run in 00:00:00.1039924 for miscellaneous – 17 passed, 1 ignored, 1 failed, 0 errored.  <Expecto>
-        //
-        // dotnet watch ❌ [ChordParser.Tests (net10.0)] Exited with error code 1
-        // dotnet watch ⏳ Waiting for a file to change before restarting ...
-        //
         testCase "chordToString formats chord correctly"
         <| fun _ ->
             let chord: Domain.Chord = { Root = "C"; Tonality = Some "maj"; Extension = Some "7"; BassNote = Some "E" }
@@ -175,17 +160,48 @@ let domainChordTests =
     ]
 
 
+open FParsec // provides: run
+
 [<Tests>]
 let parserTests =
     testList "parser" [
 
-        testCase "hello world"
+        testCase "all Parser utility tests"
         <| fun _ ->
-            let subject = true
-            Expect.isTrue subject "I am, therefore I compute."
+            let testCases = [
+                ("str() test", "maj", "maj", Parser.str)
+                ("strCI() test", "MaJ", "maj", Parser.strCI)
+                ("str() empty input", "", "", Parser.str)
+                // ("str() with whitespace", "   maj  ", "maj", Parser.str)
+                // ("strCI() with whitespace", "   MaJ  ", "maj", Parser.strCI)
+                // ("str() invalid input", "xyz", "maj", Parser.str)
+                // ("strCI() invalid input", "xyz", "maj", Parser.strCI)
+                ("str() with special chars", "!@#", "!@#", Parser.str)
+                ("strCI() with mixed case", "hElLo", "hello", Parser.strCI)
+                // ("str() unexpected character", "123", "maj", Parser.str)
+                // ("str() whitespace failure", "   ", "maj", Parser.str)
+                ("strCI() case-sensitive failure", "HELLO", "hello", Parser.strCI)
+            ]
+
+            testCases
+            |> List.iter (fun (name, input, expected, parser) ->
+                match run (parser input) expected with
+                | Success (value, _, _) -> Expect.equal value expected $"%s{name}: %s{value} should be {expected}"
+                | Failure (msg, _, _) -> Tests.failtest $"%s{name}: {msg}")
+
+        testCase "ws()"
+        <| fun _ ->
+            let input = "    "
+            let expected = () // expected result is unit (because ws consumes whitespace)
+            let parser = Parser.ws
+
+            match run parser input with
+            | Success (value, remainder, _) ->
+                Expect.equal value expected $"Parsed value {value} should be {expected}"
+                Expect.equal remainder () $"Remainder of input should be empty after parsing whitespace."
+            | Failure (msg, _, _) -> Tests.failtest $"Unexpected failure: {msg}"
+
     ]
-
-
 
 // // Chromatic scale
 // let chromaticNotes = ["A"; "A#"; "B"; "C"; "C#"; "D"; "D#"; "E"; "F"; "F#"; "G"; "G#"]

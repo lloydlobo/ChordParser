@@ -67,9 +67,9 @@ module Parser =
         | Lyrics of string
         | Chord of Chord
 
-    let str s = pstring s
-    let strCI s = pstringCI s
-    let ws = spaces
+    let str s = pstring s // matches a literal string
+    let strCI s = pstringCI s // case-insensitive matching
+    let ws = spaces // parse whitespace characters
 
     let createChord (((root, tonality), ext), bassNote) =
         { Root = root; Tonality = tonality; Extension = ext; BassNote = bassNote }
